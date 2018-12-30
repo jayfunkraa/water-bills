@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head('bills')"></head>
+<body>
+<div th:replace="layout :: nav"></div>
+<main role="main" class="container">
+    <div>
+        <h2>Bills</h2>
+        <a href="/bills/add">Add New</a>
+    </div>
+    <div class="card mt-2" th:each="bill : ${bills}">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-2">
+                    <h3 th:text="${#dates.format(bill.billDate, 'MMMM')}"></h3>
+                    <p class="text-muted" th:text="@{|Due: ${#dates.format(bill.dueDate, 'dd/MM/yy')}|}"></p>
+                </div>
+                <div class="col-md-2">
+                    <table>
+                    	<tr>
+                    		<td><p>Total:</p></td>
+                    		<td><p th:text="@{|£${bill.amount}|}"></p></td>
+                    	</tr>
+                    	<tr>
+                    		<td><p>Units:</p></td>
+                    		<td><p th:text="${bill.totalUnits}"></p></td>
+                    	</tr>
+                    </table>
+                </div>
+                <div class="col-md-3">
+                	<table>
+                		<tr>
+                			<td><h5>Reading</h5></td>
+                			<td><i th:class="'ml-2 fas' + (${bill.readingAdded}? ' fa-check text-success' : ' fa-times text-muted')"></i></td>
+                		</tr>
+                		<tr>
+                			<td><h5>Paid</h5></td>
+                			<td><i th:class="'ml-2 fas' + (${bill.paid}? ' fa-check text-success' : ' fa-times text-muted')"></i></td>
+                		</tr>
+                	</table>
+                </div>
+                <div class="col-md-3">
+                	<table>
+                		<tr>
+                			<td><h5>Upstairs:</h5></td>
+                			<td><p th:text="${bill.upAmount}"></p></td>
+                		</tr>
+                		<tr>
+                			<td><h5>Downstairs:</h5></td>
+                			<td><p th:text="${bill.downAmount}"></p></td>
+                		</tr>
+                	</table>
+                </div>
+                <div class="col-md-2 bg-light">
+                    <ul class="fa-ul">
+                        <li><span class="fa-li"><i class="fas fa-xs fa-edit text-dark"></i></span><a class="text-dark" th:href="@{|/bills/${bill.id}/edit|}">Edit</a></li>
+                        <li><span class="fa-li"><i class="fas fa-xs fa-plus text-dark"></i></span><a class="text-dark" th:href="@{|/bills/${bill.id}/add-reading|}">Add Reading</a></li>
+                        <!-- <li><a class="text-dark" th:href="@{|/bills/${bill.id}/edit-reading|}">Edit Reading</a></li> -->
+                        <li><span class="fa-li"><i class="fas fa-xs fa-trash-alt text-dark"></i></span><a class="open-deleteModal text-dark" href="#" th:data-id="${bill.id}" data-toggle="modal"
+                               data-target="#deleteModal">Delete</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!------ MODAL ------>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Confirm Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you wish to delete this bill?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <form action="" method="post" id="deleteForm">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<div th:replace="layout :: scripts"></div>
+<script type="text/javascript">
+$(document).ready(function () {
+    $(document).on("click", ".open-deleteModal", function () {
+        var myBillId = $(this).data('id');
+        $(".modal-footer #deleteForm").attr("action","/bills/" + myBillId + "/delete");
+    });
+});
+
+
+
+</script>
+</body>
+</html>

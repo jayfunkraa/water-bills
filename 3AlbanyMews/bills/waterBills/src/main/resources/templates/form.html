@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head('bills')"></head>
+<body>
+<div th:replace="layout :: nav"></div>
+<main role="main" class="container">
+    <h2 th:text="@{${heading} + ' Bill'}"></h2>
+    <!-- Bill -->
+    <form th:action="@{${action}}" method="post" th:object="${bill}">
+        <div class="row">
+            <input type="hidden" th:field="*{id}">
+            <input type="hidden" th:field="*{readingAdded}">
+            <div class="col-md-6 form-group">
+                <label for="billDate">Bill Date</label>
+                <input type="date" class="form-control" id="billDate" th:field="*{billDate}">
+            </div>
+            <div class="col-md-6 form-group">
+                <label for="dueDate">Due Date</label>
+                <input type="date" class="form-control" id="dueDate" th:field="*{dueDate}">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label for="totalUnits">Units</label>
+                <input type="number" step="0.01" class="form-control" id="totalUnits" th:field="*{totalUnits}">
+            </div>
+            <div class="col-md-6 form-group">
+                <label for="amount">Total</label>
+                <input type="number" min="0" step="0.01" class="form-control" id="amount" th:field="*{amount}">
+            </div>
+        </div>
+        <!-- Reading -->
+        <div class="row" th:if="${bill.readingAdded}">
+        	<div class="col-md-6 form-group">
+            	<label for="readingDate">Reading Date</label>
+            	<input type="date" class="form-control" id="readingDate" th:field="*{readingDate}">
+        	</div>
+        	<div class="col-md-6 form-group">
+            	<label for="readingUnits">Units</label>
+            	<input type="number" step="0.01" class="form-control" id="readingUnits" th:field="*{readingUnits}">
+        	</div>
+        </div>
+        <div class="row">
+        	<div class="col-md-12">
+            	<button type="submit" class="mx-1 btn btn-primary" th:text="${submit}"></button>
+            	<a href="/bills" class=" mx-1 btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </form>
+</main>
+<div th:replace="layout :: scripts"></div>
+</body>
+</html>
