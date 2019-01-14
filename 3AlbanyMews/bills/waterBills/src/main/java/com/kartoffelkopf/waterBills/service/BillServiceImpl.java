@@ -1,23 +1,22 @@
 package com.kartoffelkopf.waterBills.service;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.kartoffelkopf.waterBills.data.BillDao;
 import com.kartoffelkopf.waterBills.model.Bill;
+import com.kartoffelkopf.waterBills.model.Reading;
 
 @Service
 public class BillServiceImpl implements BillService {
 
 	@Autowired
 	private BillDao billDao;
+	
+	@Autowired
+	private ReadingService readingService;
 	
 	@Override
 	public List<Bill> findAll() {
@@ -40,49 +39,44 @@ public class BillServiceImpl implements BillService {
 	}
 
 	@Override
-	public void addReading(Long billId, Date readingDate, float readingUnits, String readingFilePath) {
-		Bill bill = billDao.findById(billId);
-		bill.setReadingDate(readingDate);
-		bill.setReadingUnits(readingUnits);
-		bill.setReadingFilePath(readingFilePath);
-		bill.setReadingAdded(true);
-		billDao.save(bill);
+	public void addReading(Long id, Reading reading) {
+		Bill bill = findById(id);
+		Long readingId = readingService.save(reading);
+		bill.setReading(readingService.findById(readingId));
+		save(bill);
 	}
 	
-	@Override
-	public Map<Date, Float> getAllReadings() {
-		Map<Date, Float> readings = new HashMap<>();
-		List<Bill> bills = billDao.findAll();
-		for (Bill bill : bills) {
-			readings.put(bill.getReadingDate(), bill.getReadingUnits());
-		}
-		Map<Date, Float> result = readings.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                        (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-		return result;
+	public Bill getPreviousBill(Bill bill) {
+		return billDao.getPreviousBill(bill);
 	}
-	
+
 	@Override
-	public void calculate(Bill bill) {
-		Map<Date, Float> readings = getAllReadings();
-		Date prevDate;
-		float prevUnits = 0;
-		float unitsUsed = 0;
-		float percent = 0;
-		
-		for (Map.Entry<Date, Float> entry : readings.entrySet()) {
-			prevDate = entry.getKey();
-			prevUnits = entry.getValue();
-			if (entry.getKey().equals(bill.getReadingDate())) {
-				break;
-			}
+	public void calculate(Long id) {
+		Bill bill = findById(id);
+		try {
+		float downUnitsUsed = bill.getReading().getUnits() - readingService.getPreviousReading(bill.getReading()).getUnits();
+		bill.setDownAmount(bill.getAmount() * (downUnitsUsed / bill.getTotalUnits()));
+		bill.setUpAmount(bill.getAmount() - bill.getAmount() * (downUnitsUsed / bill.getTotalUnits()));
+		save(bill);
+		} catch (Exception e) {
+			e.printStackTrace();
+			bill.setDownAmount(0);
+			bill.setUpAmount(0);
+			save(bill);
 		}
 		
-		unitsUsed = bill.getReadingUnits() - prevUnits;
-		percent = unitsUsed / bill.getTotalUnits();
-		bill.setDownAmount(bill.getAmount() * percent);
 		
-		billDao.save(bill);
+	}
+
+	@Override
+	public boolean togglePaid(Long id) {
+		Bill bill = findById(id);
+		if (bill.isPaid()) {
+			bill.setPaid(false);
+		} else {
+			bill.setPaid(true);
+		}
+		save(bill);
+		return bill.isPaid();
 	}
 }

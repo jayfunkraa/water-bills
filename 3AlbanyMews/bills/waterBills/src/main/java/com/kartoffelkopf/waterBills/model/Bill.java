@@ -1,95 +1,83 @@
 package com.kartoffelkopf.waterBills.model;
 
-import java.util.Date;
-
+import java.time.LocalDate;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
-public class Bill {
-	
+public class Bill implements Comparable<Bill> {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
-	//Bill
+
+	// Bill
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date billDate;
+	private LocalDate billDate;
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date dueDate;
+	private LocalDate dueDate;
 	private float amount;
 	private float totalUnits;
+	@OneToOne
+	private Reading reading;
 
-	
-	//Reading
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date readingDate;
-	private float readingUnits;
-	private String readingFilePath;
-	
-	//Calculated
+	// Calculated
 	private float upAmount;
 	private float downAmount;
-	private boolean readingAdded = false;
 	private boolean paid;
-	
-	public Bill() {}
-	
-	public Date getBillDate() {
+
+	public Bill() {
+	}
+
+	public LocalDate getBillDate() {
 		return billDate;
 	}
-	public void setBillDate(Date billDate) {
+
+	public void setBillDate(LocalDate billDate) {
 		this.billDate = billDate;
 	}
-	public Date getDueDate() {
+
+	public LocalDate getDueDate() {
 		return dueDate;
 	}
-	public void setDueDate(Date dueDate) {
+
+	public void setDueDate(LocalDate dueDate) {
 		this.dueDate = dueDate;
 	}
+
 	public float getAmount() {
 		return amount;
 	}
+
 	public void setAmount(float amount) {
 		this.amount = amount;
 	}
+
 	public float getTotalUnits() {
 		return totalUnits;
 	}
+
 	public void setTotalUnits(float totalUnits) {
 		this.totalUnits = totalUnits;
 	}
-	public Date getReadingDate() {
-		return readingDate;
-	}
-	public void setReadingDate(Date readingDate) {
-		this.readingDate = readingDate;
-	}
-	public float getReadingUnits() {
-		return readingUnits;
-	}
-	public void setReadingUnits(float readingUnits) {
-		this.readingUnits = readingUnits;
-	}
-	public String getReadingFilePath() {
-		return readingFilePath;
-	}
-	public void setReadingFilePath(String readingFilePath) {
-		this.readingFilePath = readingFilePath;
-	}
+
 	public float getUpAmount() {
 		return upAmount;
 	}
+
 	public void setUpAmount(float upAmount) {
 		this.upAmount = upAmount;
 	}
+
 	public float getDownAmount() {
 		return downAmount;
 	}
+
 	public void setDownAmount(float downAmount) {
 		this.downAmount = downAmount;
 	}
@@ -102,14 +90,6 @@ public class Bill {
 		this.id = id;
 	}
 
-	public boolean isReadingAdded() {
-		return readingAdded;
-	}
-
-	public void setReadingAdded(boolean readingAdded) {
-		this.readingAdded = readingAdded;
-	}
-
 	public boolean isPaid() {
 		return paid;
 	}
@@ -117,7 +97,22 @@ public class Bill {
 	public void setPaid(boolean paid) {
 		this.paid = paid;
 	}
-	
-	
+
+	public Reading getReading() {
+		return reading;
+	}
+
+	public void setReading(Reading reading) {
+		this.reading = reading;
+	}
+
+	@Override
+	public int compareTo(Bill o) {
+		if (getBillDate() == null || o.getBillDate() == null) {
+			return 0;
+		} else {
+			return getBillDate().compareTo(o.getBillDate());
+		}
+	}
 
 }

@@ -10,5 +10,6 @@ public interface BillDao {
 	Bill findById(Long id);
 	void save(Bill bill);
 	void delete(Bill bill);
+	Bill getPreviousBill(Bill bill);
 
 }
